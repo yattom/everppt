@@ -3,7 +3,7 @@
 import unittest
 from ConfigParser import SafeConfigParser
 
-from everppt.evernote import Evernote
+from everppt.notes import Evernote
 
 config = SafeConfigParser()
 config.read("test.ini")
@@ -19,7 +19,11 @@ class EvernoteTest(unittest.TestCase):
         self.assertTrue(self.evernote.authenticated(), 'should be authenticated')
 
     def test_authenticate_fail(self):
-        self.evernote.authenticate('NOSUCHUSER', 'DUMMY')
+        try:
+            self.evernote.authenticate('NOSUCHUSER', 'DUMMY')
+            self.fail('should raise exception')
+        except StandardError:
+            pass
         self.assertFalse(self.evernote.authenticated(), 'should not be authenticated')
 
     def test_list_notes(self):
