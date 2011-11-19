@@ -28,3 +28,5 @@ class EvernoteTest(unittest.TestCase):
 
     def test_list_notes(self):
         notes = self.evernote.list_notes()
+        self.assertTrue(type(notes) == list, 'notes should be a list')
+        # TODO create a note and then test list_notes()
