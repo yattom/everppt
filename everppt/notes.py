@@ -19,24 +19,13 @@ class Evernote(object):
         self.auth_result = None
 
     def authenticate(self, username, password):
-        evernoteHost = "sandbox.evernote.com"
-        userStoreUri = "https://" + evernoteHost + "/edam/user"
-        noteStoreUriBase = "https://" + evernoteHost + "/edam/note/"
-
-        userStoreHttpClient = THttpClient.THttpClient(userStoreUri)
-        userStoreProtocol = TBinaryProtocol.TBinaryProtocol(userStoreHttpClient)
-
-        userStore = UserStore.Client(userStoreProtocol)
-
-        versionOK = userStore.checkVersion("Python EDAMTest",
-                                           UserStoreConstants.EDAM_VERSION_MAJOR,
-                                           UserStoreConstants.EDAM_VERSION_MINOR)
         api_key = config.get('evernote api', 'consumer_key')
         api_secret = config.get('evernote api', 'consumer_secret')
 
+        user_store = self.create_user_store()
         self.auth_result = None
         try :
-            self.auth_result = userStore.authenticate(username, password,
+            self.auth_result = user_store.authenticate(username, password,
                                                 api_key, api_secret)
         except Errors.EDAMUserException as e:
             # See http://www.evernote.com/about/developer/api/ref/UserStore.html#Fn_UserStore_authenticate
@@ -47,6 +36,23 @@ class Evernote(object):
 
     def authenticated(self):
         return self.auth_result != None
+
+    def create_user_store(self):
+        host = "sandbox.evernote.com"
+        uri = "https://" + host + "/edam/user"
+
+        http_client = THttpClient.THttpClient(uri)
+        protocol = TBinaryProtocol.TBinaryProtocol(http_client)
+
+        user_store = UserStore.Client(protocol)
+
+        version_ok = user_store.checkVersion("Python EDAMTest",
+                                           UserStoreConstants.EDAM_VERSION_MAJOR,
+                                           UserStoreConstants.EDAM_VERSION_MINOR)
+        if not version_ok:
+            raise StandardError("EDAM version error")
+
+        return user_store
 
     def list_notes(self):
         pass
